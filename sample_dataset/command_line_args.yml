@@ -1,0 +1,48 @@
+view_optimization: false
+json_file: /home/bruno/datasets/zau/dataset_filtered/dataset_corrected_with_odometry_and_depth_and_rgb_and_pattern_poses_filtered_train.json
+verbose: true
+show_normalized_values: false
+rgb_normalizer_multiplier: 0.05
+ros_visualization: false
+draw_per_collection_colors: false
+draw_alpha: 0.5
+show_images: false
+optimize_intrinsics: false
+sample_residuals: 1
+sample_seed: null
+sample_longitudinal_residuals: 1
+all_joints_fixed: false
+only_anchored_sensor: false
+anchor_sensors: null
+anchor_patterns: false
+ground_truth_pattern_poses: false
+use_incomplete_collections: true
+ignore_anchored_sensor: false
+remove_partial_detections: false
+noisy_initial_guess:
+- 0.0
+- 0.0
+noisy_tf_links: null
+noisy_tf_values: null
+joint_bias_names: null
+joint_bias_params: null
+joint_bias_values: null
+sensor_selection_function: 'lambda x: x in [''rgb_body_left'',''rgb_body_right'',''rgbd_hand_color'',''rgbd_hand_depth'',''lidar_body'']'
+collection_selection_function: 'lambda x: int(x) in [1, 2, 4, 5, 7, 9, 10, 11, 13,
+  14, 15, 16, 17, 20, 22, 26, 27, 28, 29, 30, 32, 36, 37, 39, 40, 41, 43, 44, 45,
+  46, 48, 49, 50, 51, 53, 55, 56, 57, 58, 59]'
+joint_selection_function: null
+joint_parameter_selection_function: null
+pattern_selection_function: null
+additional_tf_selection_function: null
+phased_execution: false
+initial_pose_ghost: false
+comparison_to_ground_truth: false
+save_calibration_errors: true
+optimization_ftol: 0.001
+optimization_xtol: 0.001
+optimization_gtol: 0.001
+optimization_diff_step: null
+optimization_max_nfev: null
+save_file_results: false
+save_file_results_name: null

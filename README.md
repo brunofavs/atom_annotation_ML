@@ -1,3 +1,20 @@
+# Relevant information for this fork
+
+To annotate a sensor of a given dataset : 
+
+```bash
+rosrun atom_evaluation annotate_pattern_borders_in_rgb_or_depth --dataset ${dataset_path/dataset_file.json} --rgb_sensor ${sensor_name}
+```
+
+Example:
+
+```bash
+rosrun atom_evaluation annotate_pattern_borders_in_rgb_or_depth --dataset /home/bruno/datasets/zau/dataset_filtered/dataset_corrected_with_o
+dometry_and_depth_and_rgb_and_pattern_poses_filtered.json --rgb_sensor rgbd_hand_color
+```
+
+
+
 # ATOM Calibration
 
 <p align="center">

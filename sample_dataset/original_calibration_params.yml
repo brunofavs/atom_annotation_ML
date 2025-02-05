@@ -1,0 +1,57 @@
+sensors:
+  lidar_body:
+    x: 0.42
+    y: 0.0
+    z: 0.785
+    roll: -0.0
+    pitch: 0.0
+    yaw: -0.0
+  rgb_body_left:
+    x: 0.42
+    y: 0.18
+    z: 0.785
+    roll: -0.0
+    pitch: 0.0
+    yaw: -0.0
+  rgb_body_right:
+    x: 0.42
+    y: -0.18
+    z: 0.785
+    roll: 0.0
+    pitch: 0.0
+    yaw: -0.7853981633974485
+  rgbd_hand_color:
+    x: 0.0
+    y: 0.0
+    z: 0.024
+    roll: 3.1228705486556994
+    pitch: 0.0
+    yaw: -0.0
+  rgbd_hand_depth:
+    x: 0.03388825058937073
+    y: -0.02679315209388733
+    z: 0.0
+    roll: 3.1228705486556994
+    pitch: 0.0
+    yaw: -0.0
+  vo_body_fisheye1:
+    x: 0.00028840109007433057
+    y: 0.032134123146533966
+    z: 0.00018909321806859225
+    roll: -3.138350476301939
+    pitch: 0.005300987850324454
+    yaw: 3.125892155069083
+  vo_body_fisheye2:
+    x: -0.00028840109007433057
+    y: -0.032134123146533966
+    z: -0.00018909321806859225
+    roll: 3.137534499236514
+    pitch: 0.003573922893897561
+    yaw: 3.132152626451162
+additional_tfs:
+  vo_body_fisheye2_x: 0.00019871990394543202
+  vo_body_fisheye2_y: 3.2113899706184735e-06
+  vo_body_fisheye2_z: 0.0
+  vo_body_fisheye2_roll: -0.0
+  vo_body_fisheye2_pitch: 0.0
+  vo_body_fisheye2_yaw: 0.0488428375505033
