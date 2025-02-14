@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
 
     image_ids.sort()
-    image_names_and_ids =  dict(sorted(image_names_and_ids.items()))
+    image_names_and_ids = dict(sorted(image_names_and_ids.items(), key=lambda t: int(t[0]))) 
 
     # ----------------------------------------------------
     # Load annotations
@@ -105,6 +105,7 @@ if __name__ == "__main__":
             print(Fore.RED + 'This annotations file does not have the correct version. Exiting.' + Style.RESET_ALL)
     else:
         annotations = {}
+        print("Didn't found annotation file")
 
 
     # ----------------------------------------------------
@@ -118,13 +119,14 @@ if __name__ == "__main__":
 
     for image_id, image_name in image_names_and_ids.items():
 
+        print(image_id)
+
         if image_id not in annotations:  # Create collection_key if they do not exist.
             annotations[image_id] = {}
 
         for side in sides:  # Create pattern side dicts inside if they do not exist.
             if not side in annotations[image_id]:
                 annotations[image_id][side] = {'xs': [], 'ys': [], 'ixs': [], 'iys': []}
-
 
 
     # ----------------------------------------------------
