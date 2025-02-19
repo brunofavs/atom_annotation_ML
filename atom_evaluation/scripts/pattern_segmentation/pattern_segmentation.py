@@ -58,7 +58,7 @@ def main():
     weights = DeepLabV3_ResNet50_Weights.DEFAULT
     category_name = weights.meta["categories"]
     print(category_name)
-    exit()
+    # exit()
 
     # ----------------
     # Find ATOM base path
@@ -131,44 +131,44 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    # for epoch in range(num_epochs):
-    #     model.train()
-    #     epoch_loss = 0
-    #     
-    #     for images, masks in train_loader:
-    #         images, masks = images.to(device), masks.to(device)
-    #
-    #         masks = masks.squeeze(1) # Shape: [4, 1, 256, 256] to [4, 256, 256]
-    #
-    #         
-    #         optimizer.zero_grad()
-    #         outputs = model(images)['out']  # Get the segmentation output
-    #
-    #
-    #         predictions = torch.argmax(outputs, dim=1)  # Shape: [4, 256, 256]
-    #         predictions = predictions.float()  # Ensure logits are float
-    #
-    #         # print(predictions.dtype)
-    #         # print(masks.dtype)
-    #
-    #         loss = criterion(predictions, masks)
-    #         loss.requires_grad = True
-    #         loss.backward()
-    #         optimizer.step()
-    #
-    #         epoch_loss += loss.item()
-    #
-    #     print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {epoch_loss/len(train_loader):.4f}")
+    for epoch in range(num_epochs):
+        model.train()
+        epoch_loss = 0
+        
+        for images, masks in train_loader:
+            images, masks = images.to(device), masks.to(device)
+    
+            masks = masks.squeeze(1) # Shape: [4, 1, 256, 256] to [4, 256, 256]
+    
+            
+            optimizer.zero_grad()
+            outputs = model(images)['out']  # Get the segmentation output
+    
+    
+            predictions = torch.argmax(outputs, dim=1)  # Shape: [4, 256, 256]
+            predictions = predictions.float()  # Ensure logits are float
+    
+            # print(predictions.dtype)
+            # print(masks.dtype)
+    
+            loss = criterion(predictions, masks)
+            loss.requires_grad = True
+            loss.backward()
+            optimizer.step()
+    
+            epoch_loss += loss.item()
+    
+        print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {epoch_loss/len(train_loader):.4f}")
 
 
 
-    model.eval()
-    with torch.no_grad():
-        for images, _ in test_loader:
-            images = images.to(device)
-            outputs = model(images)['out']
-            predictions = torch.argmax(outputs, dim=1)  # Get class labels per pixel
-            print(predictions)
+    # model.eval()
+    # with torch.no_grad():
+    #     for images, _ in test_loader:
+    #         images = images.to(device)
+    #         outputs = model(images)['out']
+    #         predictions = torch.argmax(outputs, dim=1)  # Get class labels per pixel
+    #         print(predictions)
 
 
 
