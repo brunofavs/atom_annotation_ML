@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+
+import json
+import argparse
+import sys
+import os
+import re
+import glob
+
+from atom_core.system import resolvePath
+
+'''
+
+This script fuses atleast 2 annotation files to produce a bigger dataset. One is the primary and all others will concatenate to the primary. The key names of the secondaries will be overwritten with the names starting on the highest key of the primary. The image names are also changed. This assumes that the images are on the path and that their name is sensor_xxx.image_format. Might add a flag for different names, as the "sensor" format is only present in ATOM datasets.
+
+It outputs the new annotation file alongside the renamed images corresponding the fused annotation files in a desired folder
+
+
+'''
+# To get absolute paths
+def absoluteFilePaths(directory):
+    for dirpath,_,filenames in os.walk(directory):
+        for f in filenames:
+            yield os.path.abspath(os.path.join(dirpath, f))
+
+
+def main():
+
+    ap = argparse.ArgumentParser()
+
+    ap.add_argument('-al', '--annotation_list', nargs="*",type=str, required=True, help="List of annotation files to be fused to the primary.")
+    ap.add_argument('-ap', '--annotation_primary',type=str,         required=True, help="Primary annotation file, others will concatenate to this one.")
+    ap.add_argument('-of', '--output_folder',type=str,              required = True, help="Path to output new annotation file & images.")
+
+    ap.add_argument("-ow", "--overwrite", action="store_true", default=False, help="Overwrite output folder. It the folder is empty the flag has no effect. If the folder has contents and this flag is on, it will overwrite the contents, otherwise will quit")
+
+    collection_re_pattern = r"(?<=\_)\d+(?=\.)"
+    sensor_re_pattern_on_annotationFile = r'(?<=annotation_).+(?=\.json)'
+
+    # Roslaunch adds two arguments (__name and __log) that break our parser. Lets remove those.
+    arglist = [x for x in sys.argv[1:] if not x.startswith("__")]
+    args = vars(ap.parse_args(args=arglist))
+
+    annotation_filepaths = args["annotation_list"]
+
+    primary_annotation_filepath = resolvePath(args["annotation_primary"])
+
+    output_folder = resolvePath(args["output_folder"])
+
+    if len(os.listdir(output_folder))!=0 and not args["overwrite"]:
+        print("The output folder has contents and the overwrite flag is not set. Quitting")
+        exit()
+
+    if len(os.listdir(output_folder))!=0 and args["overwrite"]:
+        answer = input("Output folder has contents and overwrite flag is set. Do you want to erase the contents of the output folder? y/n yes/no\n\n")
+        if answer.lower() in ["y","yes"]:
+
+            files = glob.glob(f'{output_folder}/*')
+            # __import__('pprint').pprint(files)
+            for f in files:
+                os.remove(f)
+            print(f'Successfully erased {len(files)} files in {output_folder}')
+
+        elif answer.lower() in ["n","no"]:
+            print("Quitting without any action")
+            exit()
+        else:
+            print("Quitting without any action")
+            exit()      
+
+
+    
+    for idx,filepath in enumerate(annotation_filepaths):
+        annotation_filepaths[idx] = resolvePath(filepath)
+
+    # Opening JSON file
+    with open(primary_annotation_filepath) as json_file:
+        primary_annotation = json.load(json_file)
+        primary_metadata = primary_annotation['_metadata']
+        primary_annotation.pop('_metadata')
+
+    primary_annotation = dict(sorted(primary_annotation.items(), key= lambda t : int(t[0])))
+
+    primary_annotation_filename = os.path.basename(primary_annotation_filepath)
+    primary_annotation_directory = os.path.dirname(primary_annotation_filepath)
+
+    # This value should be updated after concatening the first annotation
+    highest_primary_key = max(map(int,primary_annotation.keys()))
+
+
+    # Copy primary annotation images to the new directory
+    # The filename here stays the same as the keys of the first annotation are not modified
+
+    image_prefix = re.findall(sensor_re_pattern_on_annotationFile,primary_annotation_filename)[0]
+
+    # Regex pattern for images pertaining to the annotation
+    match_images = re.compile(f'{image_prefix}')
+
+    for filepath in absoluteFilePaths(primary_annotation_directory):
+        filename = os.path.basename(filepath)
+
+        if match_images.match(filename):
+            os.system(f'cp {filepath} {output_folder}/{filename}')
+
+
+
+
+
+    # Iterate through all annotations to concatenate
+    for annotation_file_path in annotation_filepaths:
+
+        annotation_filename = os.path.basename(annotation_file_path)
+        annotation_directory = os.path.dirname(annotation_file_path)
+        sensor_name = re.findall(sensor_re_pattern_on_annotationFile,annotation_filename)[0]
+
+        # Rename keys in dictionary
+        with open(annotation_file_path) as json_file:
+            annotation = json.load(json_file)
+            metadata = annotation['_metadata']
+            annotation.pop('_metadata')
+
+        # New dict with same keys as annotation, and values corresponding to the new keys
+        d1 = dict()
+
+        # Enumerate idx and keys but not values
+        for idx,key in enumerate(annotation):
+            d1[key],temporary_highest_key = (str(highest_primary_key + idx+1),)*2
+
+        # Update value of highest key for next concatenations
+        highest_primary_key = int(temporary_highest_key)
+
+        # New dictionary with updated keys
+        annotation_with_new_keys = dict((d1[key], value) for (key, value) in annotation.items())
+
+        # Keys have to be str for this method of concatenation
+        annotation_concatenated = dict(primary_annotation, **annotation_with_new_keys)
+
+
+        # Regex pattern for images pertaining to the annotation
+        match_images = re.compile(f'{sensor_name}')
+
+        # Copy files over to the new directory with the updated filename to match the new annotations
+        for filepath in absoluteFilePaths(annotation_directory):
+            filename = os.path.basename(filepath)
+
+            # Match only searches in the beggining of the string !!!!!!!!!!!!!!!!!!!!!!!!!!
+            if match_images.match(filename):
+
+                #Find original key
+                original_key = re.findall(collection_re_pattern,filename)[0]
+
+                # Find new key given original key
+                replacement = d1[original_key]
+
+                # Compute new name for the images
+                new_filename= re.sub(collection_re_pattern,replacement,filename)
+
+                os.system(f'cp {filepath} {output_folder}/{new_filename}')
+                # print(f'cp {filepath} {output_folder}/{new_filename}')
+
+
+    #Save json to new location, because it can only be dumped after all concatenations are made
+    with open(f'{output_folder}/annotation.json', 'w') as f:
+        json.dump(annotation_concatenated, f)
+
+
+if __name__=="__main__":
+    main()

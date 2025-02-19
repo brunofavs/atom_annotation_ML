@@ -74,6 +74,9 @@ if __name__ == "__main__":
     image_names_and_ids = dict()
     image_ids=[]
 
+    image_prefix = re.findall(r".+(?=\_\d+\.)",image_names[0])[0]
+
+
     for name in image_names:
         id = re.findall(pattern,name)
 
@@ -95,7 +98,7 @@ if __name__ == "__main__":
     side_colors = [(0, 0, 255), (0, 255, 0), (255, 0, 0), (0, 255, 255)]
     side_symbols = ['square', 'cross', 'square', 'cross']
 
-    annotation_file = image_folder + "/annotation" + ".json"
+    annotation_file = image_folder + "/annotation_" + image_prefix + ".json"
     if os.path.exists(annotation_file):
         print('Found anotation file at ' + annotation_file + ' ... loading.')
         f = open(annotation_file, 'r')
@@ -119,7 +122,7 @@ if __name__ == "__main__":
 
     for image_id, image_name in image_names_and_ids.items():
 
-        print(image_id)
+        # print(image_id)
 
         if image_id not in annotations:  # Create collection_key if they do not exist.
             annotations[image_id] = {}
