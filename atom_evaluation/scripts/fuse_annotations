@@ -112,6 +112,7 @@ def main():
         annotation_filename = os.path.basename(annotation_file_path)
         annotation_directory = os.path.dirname(annotation_file_path)
         sensor_name = re.findall(sensor_re_pattern_on_annotationFile,annotation_filename)[0]
+        print(f'Concatenating {annotation_filename} to {primary_annotation_filename}')
 
         # Rename keys in dictionary
         with open(annotation_file_path) as json_file:
@@ -163,6 +164,8 @@ def main():
                 # print(f'cp {filepath} {output_folder}/{new_filename}')
 
 
+    print(f'Saving concatenated annotation file and images to {output_folder}')
+    annotation_concatenated['_metadata'] = metadata
     #Save json to new location, because it can only be dumped after all concatenations are made
     with open(f'{output_folder}/annotation.json', 'w') as f:
         json.dump(annotation_concatenated, f)
