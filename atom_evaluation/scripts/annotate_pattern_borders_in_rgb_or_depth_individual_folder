@@ -99,6 +99,11 @@ if __name__ == "__main__":
     side_symbols = ['square', 'cross', 'square', 'cross']
 
     annotation_file = image_folder + "/annotation_" + image_prefix + ".json"
+
+    if not os.path.exists(annotation_file):
+        annotation_file = image_folder + "/annotation.json"
+
+
     if os.path.exists(annotation_file):
         print('Found anotation file at ' + annotation_file + ' ... loading.')
         f = open(annotation_file, 'r')
