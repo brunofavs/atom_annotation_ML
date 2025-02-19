@@ -133,6 +133,27 @@ def dice_coefficient(prediction, target, epsilon=1e-07):
     return dice
 
 
+def test_model(model, device,  weights_path="my_checkpoint.pth", image_path = "./random_images/rgbd_hand_color_016.jpg"):
+    model.load_state_dict(torch.load(weights_path, weights_only=False))
+
+    transformation = transforms.Compose([
+            transforms.Resize((512, 512)),
+            transforms.ToTensor()])
+    with torch.no_grad():
+        img = Image.open(image_path).convert("RGB")
+        img_transformed = transformation(img).float().unsqueeze(0).to(device)
+        pred = model(img_transformed)
+        pred = pred.squeeze(0).permute(1,2,0).cpu()
+        pred = pred.squeeze()
+        pred[pred < 0] = 0
+        pred[pred > 0] = 1
+        img_transformed = img_transformed.cpu()
+        plt.figure(figsize=(15, 16))
+        plt.subplot(131), plt.imshow(img_transformed.cpu().detach().squeeze().permute(1, 2, 0)), plt.title("original")
+        plt.subplot(132), plt.imshow(pred, cmap="gray"), plt.title("predicted")
+        plt.show()
+    exit()
+
 # input_image = torch.rand((1,3,512,512))
 # model = UNet(3,10)
 # output = model(input_image)
@@ -178,7 +199,9 @@ def main():
                                 shuffle=True)
 
     model = UNet(in_channels=3, num_classes=1).to(device)
-    model.load_state_dict(torch.load("my_checkpoint200.pth", weights_only=False))
+    test_model(model, device, weights_path="my_checkpoint200.pth", image_path = "./random_images/pattern_63.jpg")
+
+    # model.load_state_dict(torch.load("my_checkpoint200.pth", weights_only=False))
     optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE)
     criterion = nn.BCEWithLogitsLoss()
     torch.cuda.empty_cache()
