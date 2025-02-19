@@ -105,7 +105,7 @@ def main():
 
 
 
-
+    first_iteration_through_annotations = True
     # Iterate through all annotations to concatenate
     for annotation_file_path in annotation_filepaths:
 
@@ -133,7 +133,11 @@ def main():
         annotation_with_new_keys = dict((d1[key], value) for (key, value) in annotation.items())
 
         # Keys have to be str for this method of concatenation
-        annotation_concatenated = dict(primary_annotation, **annotation_with_new_keys)
+        if first_iteration_through_annotations:
+            annotation_concatenated = dict(primary_annotation, **annotation_with_new_keys)
+            first_iteration_through_annotations = False
+        else:
+            annotation_concatenated = dict(annotation_concatenated, **annotation_with_new_keys)
 
 
         # Regex pattern for images pertaining to the annotation
