@@ -12,6 +12,8 @@ from torchvision import transforms
 import os
 from PIL import Image
 import pandas as pd
+import numpy as np
+import cv2
 
 resnet_weights="ResNet50_Weights.IMAGENET1K_V1"
 
@@ -220,17 +222,23 @@ def test_model(model, device,  weights_path="my_checkpoint.pth", image_path = ".
             transforms.ToTensor()])
     with torch.no_grad():
         img = Image.open(image_path).convert("RGB")
+        shape = img.size
         img_transformed = transformation(img).float().unsqueeze(0).to(device)
         pred = model(img_transformed)
         pred = pred.squeeze(0).permute(1,2,0).cpu()
         pred = pred.squeeze()
         pred[pred < 0] = 0
-        pred[pred > 0] = 1
-        img_transformed = img_transformed.cpu()
-        plt.figure(figsize=(15, 16))
-        plt.subplot(131), plt.imshow(img_transformed.cpu().detach().squeeze().permute(1, 2, 0)), plt.title("original")
-        plt.subplot(132), plt.imshow(pred, cmap="gray"), plt.title("predicted")
-        plt.show()
+        pred[pred > 0] = 255
+        pred = np.array(pred, dtype=np.uint8)
+        pred = cv2.resize(pred, shape)
+        # cv2.imshow('teste', pred)
+        # cv2.waitKey(0)
+        cv2.imwrite("./random_saves/"+"pattern_58.jpg", pred)
+        # img_transformed = img_transformed.cpu()
+        # plt.figure(figsize=(15, 16))
+        # plt.subplot(131), plt.imshow(img_transformed.cpu().detach().squeeze().permute(1, 2, 0)), plt.title("original")
+        # plt.subplot(132), plt.imshow(pred, cmap="gray"), plt.title("predicted")
+        # plt.show()
     exit()
 
 
@@ -276,7 +284,7 @@ def main():
 
     model = UNetWithResnet50Encoder().to(device)
 
-    # test_model(model, device, weights_path="new_my_checkpoint.pth", image_path = "./random_images/pattern_61.jpg")
+    test_model(model, device, weights_path="./new_my_checkpoint.pth", image_path = "./random_images/pattern_58.jpg")
 
 
     optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE)
