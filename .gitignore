@@ -228,3 +228,6 @@ atom.code-workspace
 
 # LSP configs
 pyrightconfig.json
+
+# Torch models
+*.pth
