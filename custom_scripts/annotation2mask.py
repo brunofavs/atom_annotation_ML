@@ -1,11 +1,15 @@
 import cv2
 import json
 import numpy as np
+import re
 
 # Global variables
 LOG_collection = []
 img_num = None
 
+def extract_number(filename):
+    match = re.search(r'_(\d+)\.jpg$', filename)
+    return int(match.group(1)) if match else float('inf')  # Use inf to handle unexpected filenames
 
 def collection_error():
     print(f"The collection number {img_num} has annotation issues. Please redo the annotations for this collection")
@@ -57,6 +61,8 @@ def dataset2points(img_num, dataset, img, border_error=0.01, slope_threshold=0.3
                 present_sides.append(chr(65 + i))
 
     # Extract all points
+    if len(present_sides)==0:
+        return -1
     points_list = [pt for line in line_list for pt in line]
 
     if len(present_sides) == 2:
@@ -188,27 +194,34 @@ def dataset2points(img_num, dataset, img, border_error=0.01, slope_threshold=0.3
 # img_num = 0
 # img_num = 12
 
-path = "../sample_images/"
+# path = "../sample_images/"
+path = "../segmentation_dataset_v2/train/images/"
+masks_path = "../segmentation_dataset_v2/train/masks/"
 json_file = path + "annotation.json"
 f = open(json_file, 'r')
 dataset = json.load(f)
 f.close()  # Close the file to prevent memory leaks
 
-# check_missing_points(img_num, dataset)
 
-# exit()
+import os
+files = os.listdir(path)
+files.remove("annotation.json")
+files = sorted(files, key=extract_number)
 
-
-for img_num in range(1, 77):
-    img = cv2.imread(path + 'pattern_'+str(img_num)+'.jpg')
+# for img_num in range(1, 77):
+for filename in files:
+    match = re.search(r'_(\d+)\.jpg$', filename)
+    img_num = int(extract_number(filename))
+    img = cv2.imread(path + filename)
     points_list = dataset2points(img_num, dataset, img, border_error=0.005, slope_threshold=0.5)
     if points_list is not None:
         mask = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
-        # Define the polygon points
-        points = np.array(points_list, np.int32)
-        # Fill the polygon
-        cv2.fillPoly(mask, [cv2.convexHull(points)], 255)
-        cv2.imwrite(f"../sample_masks/mask_pattern_{str(img_num)}.jpg", mask)
+        if points_list != -1:
+            # Define the polygon points
+            points = np.array(points_list, np.int32)
+            # Fill the polygon
+            cv2.fillPoly(mask, [cv2.convexHull(points)], 255)
+        cv2.imwrite(masks_path + filename, mask)
 
 
 # img = cv2.imread(path + 'pattern_'+str(img_num)+'.jpg')
