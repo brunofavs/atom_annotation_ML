@@ -259,6 +259,22 @@ if __name__ == "__main__":
             cv2.destroyWindow(window_name)
             load_collection_data = True
 
+        if key == 58:  # ":" input collection
+            image_id_to_move_to = input("Which collection to move to?")
+
+            print('Saving annotations ...')
+            createJSONFile(annotation_file, annotations)
+
+            if image_id_to_move_to in image_ids:
+                print('Moving to collection' + image_id_to_move_to)
+                image_id = image_id_to_move_to
+                side = sides[0]
+            else:
+                print(Fore.YELLOW + 'Image selected not in dataset' + Style.RESET_ALL)
+
+            cv2.destroyWindow(window_name)
+            load_collection_data = True
+
         elif key == 44:  # "," key, previous collection
             print('Saving annotations ...')
             createJSONFile(annotation_file, annotations)
@@ -311,6 +327,7 @@ if __name__ == "__main__":
             print("\nThis script is used to annotate the boundaries of the pattern in rgb images. These annotations are used to conduct evaluation between range sensors and rgb sensors." +
                   "\nFor more information check " + Fore.BLUE + 'https://github.com/lardemua/atom#annotation\n' + Style.RESET_ALL)
             print(Style.BRIGHT + "List of keys:" + Style.RESET_ALL)
+            print(Style.BRIGHT + Fore.RED + '":"' + Style.RESET_ALL + ' choose a specific collection.')
             print(Style.BRIGHT + Fore.RED + '"."' + Style.RESET_ALL + ' next collection.')
             print(Style.BRIGHT + Fore.RED + '","' + Style.RESET_ALL + ' previous collection.')
             print(Style.BRIGHT + Fore.RED + '"n"' + Style.RESET_ALL + ' next side (moves to next collection if last side).')
