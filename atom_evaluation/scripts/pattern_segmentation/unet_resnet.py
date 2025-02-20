@@ -200,6 +200,32 @@ def dice_coefficient(prediction, target, epsilon=1e-07):
     
     return dice
 
+
+########## -------------- ##########
+########## Training tools ##########
+########## -------------- ##########
+
+class EarlyStopping:
+    def __init__(self, patience=5, min_delta=1e-4):
+        """
+        Args:
+            patience (int): Number of epochs to wait before stopping after no improvement.
+            min_delta (float): Minimum change to qualify as an improvement.
+        """
+        self.patience = patience
+        self.min_delta = min_delta
+        self.best_loss = float("inf")
+        self.counter = 0
+
+    def __call__(self, val_loss):
+        if val_loss < self.best_loss - self.min_delta:
+            self.best_loss = val_loss
+            self.counter = 0  # Reset counter when improvement occurs
+        else:
+            self.counter += 1  # Increment counter when no improvement
+
+        return self.counter >= self.patience  # Stop training if counter exceeds patience
+
 ########## ------------- ##########
 ########## Testing tools ##########
 ########## ------------- ##########
@@ -283,19 +309,29 @@ def main():
                                 shuffle=True)
 
     model = UNetWithResnet50Encoder().to(device)
+    # print(dir(model))
+    # exit()
+    # Freeze the backbone layers
+    for param in model.input_block.parameters():
+        param.requires_grad = False
 
-    test_model(model, device, weights_path="./new_my_checkpoint.pth", image_path = "./random_images/pattern_58.jpg")
+    for param in model.down_blocks.parameters():
+        param.requires_grad = False
+
+    # test_model(model, device, weights_path="./new_my_checkpoint.pth", image_path = "./random_images/pattern_58.jpg")
 
 
     optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE)
     criterion = nn.BCEWithLogitsLoss()
     torch.cuda.empty_cache()
     
-    EPOCHS = 10
+    EPOCHS = 200
     train_losses = []
     train_dcs = []
     val_losses = []
     val_dcs = []
+
+    early_stopper = EarlyStopping(patience=5, min_delta=1e-4)
 
     for epoch in tqdm(range(EPOCHS)):
         model.train()
@@ -354,9 +390,13 @@ def main():
         print(f"Validation DICE EPOCH {epoch + 1}: {val_dc:.4f}")
         print("-" * 30)
 
+        if early_stopper(val_loss):
+            print(f"Early stopping triggered at epoch {epoch + 1}")
+            break
+
     # Saving the model
     torch.save(model.state_dict(), 'my_checkpoint.pth')
-    epochs_list = list(range(1, EPOCHS + 1))
+    epochs_list = list(range(1, len(train_losses) + 1))
     train_info = {"Epochs": epochs_list, "Train losses": train_losses, "Validation losses": val_losses, "Train DICE": train_dcs, "Validation DICE": val_dcs}
     frame_train_info = pd.DataFrame.from_dict(train_info).set_index('Epochs')
     frame_train_info.to_csv('train_info.csv')
