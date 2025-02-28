@@ -292,7 +292,7 @@ def main():
     if device == "cuda":
         num_workers = torch.cuda.device_count() * 4
     LEARNING_RATE = 3e-4
-    BATCH_SIZE = 3
+    BATCH_SIZE = 19
 
     train_dataloader = DataLoader(dataset=train_dataset,
                                 num_workers=num_workers, pin_memory=False,
@@ -309,8 +309,7 @@ def main():
                                 shuffle=True)
 
     model = UNetWithResnet50Encoder().to(device)
-    # print(dir(model))
-    # exit()
+
     # Freeze the backbone layers
     for param in model.input_block.parameters():
         param.requires_grad = False
@@ -331,7 +330,7 @@ def main():
     val_losses = []
     val_dcs = []
 
-    early_stopper = EarlyStopping(patience=5, min_delta=1e-4)
+    # early_stopper = EarlyStopping(patience=5, min_delta=1e-4)
 
     for epoch in tqdm(range(EPOCHS)):
         model.train()
@@ -389,10 +388,12 @@ def main():
         print(f"Validation Loss EPOCH {epoch + 1}: {val_loss:.4f}")
         print(f"Validation DICE EPOCH {epoch + 1}: {val_dc:.4f}")
         print("-" * 30)
-
-        if early_stopper(val_loss):
-            print(f"Early stopping triggered at epoch {epoch + 1}")
+        if val_dc>0.85:
             break
+
+        # if early_stopper(val_loss):
+        #     print(f"Early stopping triggered at epoch {epoch + 1}")
+        #     break
 
     # Saving the model
     torch.save(model.state_dict(), 'my_checkpoint.pth')

@@ -73,7 +73,7 @@ def main():
     # ----------------
 
     # Load DeepLabV3 with a ResNet backbone, pretrained on COCO
-    model = models.segmentation.deeplabv3_resnet50(weights='DEFAULT')
+    
 
     # print(model)
     # exit()
@@ -82,6 +82,7 @@ def main():
     # exit()
 
     # Modify the classifier to output 2 classes
+    model = models.segmentation.deeplabv3_resnet50(weights='DEFAULT')
     num_classes = 2
     model.classifier[4] = nn.Conv2d(256, num_classes, kernel_size=1)
 
