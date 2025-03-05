@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Read the CSV file into a DataFrame
-df = pd.read_csv('train_info_resnet_frozzen_200.csv')
+df = pd.read_csv('train_info_unet_200.csv')
 
 # Extract the 'Validation DICE' column
 validation_dice = df['Validation DICE']

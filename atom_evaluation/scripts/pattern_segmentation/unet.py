@@ -210,6 +210,11 @@ def main():
     # test_model(model, device, weights_path="my_checkpoint200.pth", image_path = "./random_images/rgbd_hand_color_190.jpg")
 
     # model.load_state_dict(torch.load("my_checkpoint200.pth", weights_only=False))
+    
+    # num_params: int = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    # print(num_params)
+    # exit()
+
     optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE)
     criterion = nn.BCEWithLogitsLoss()
     torch.cuda.empty_cache()

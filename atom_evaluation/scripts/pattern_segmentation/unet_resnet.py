@@ -317,6 +317,10 @@ def main():
     for param in model.down_blocks.parameters():
         param.requires_grad = False
 
+    # num_params: int = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    # print(num_params)
+    # exit()
+
     # test_model(model, device, weights_path="./new_my_checkpoint.pth", image_path = "./random_images/pattern_58.jpg")
 
 
